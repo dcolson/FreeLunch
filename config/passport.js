@@ -12,6 +12,8 @@ var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
 var MongoClient = require('mongodb').MongoClient;
 var fb = require('fb');
 var async = require('async');
+var gcal = require('google-calendar');
+var myCal
 
 var secrets = require('./secrets');
 var User = require('../models/User');
@@ -73,59 +75,48 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
 
               fb.setAccessToken(user.token);
 
-              function first() {
-                fb.api('me/events?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-
-              function second() {
-                fb.api('me/events/maybe?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-              
-              function third() {
-                fb.api('me/events/not_replied?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-
-              function fourth() {
-                fb.api('me/events/declined?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                  for (var i = 0; i < events.length; i++) {
-                    console.log(events[i].name);
-                  };
-                });
-              }
-              var functions = [first, second, third, fourth];
-
-              async.parallel(functions, function(err, results) {
-                for (var i = 0; i < events.length; i++) {
-
+              fb.api('me/events', {
+                'fields': ['name','start_time','end_time','location','owner','description','id']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
                 }
+
+                calendar(res.data);
               });
+
+              fb.api('me/events/declined', {
+                'fields': ['name','start_time','end_time','location','owner','description','id']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res.data);
+              });
+              
+              fb.api('me/events/maybe', {
+                'fields': ['name','start_time','end_time','location','owner','description','id']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res.data);
+              });
+              
+
+              fb.api('me/events/not_replied', {
+                  'fields': ['name','start_time','end_time','location','owner','description','id']
+                }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res.data);
+              });
+            
             }
 
             var eventsCollection = db.collection('events');
@@ -162,7 +153,6 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
     // });
   // });
 
-  console.log('HHHHHHHHHHHHHHHHHHHHHHELO WORLD')
   if (req.user) {
     User.findOne({ facebook: profile.id }, function(err, existingUser) {
       if (existingUser) {
@@ -225,6 +215,10 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
   }
 }));
 
+passport.use(new GoogleStrategy(secrets.google, function(accessToken, refreshToken, profile, done) {
+  myCal = new gcal.GoogleCalendar(accessToken);
+}))
+
 /**
  * Login Required middleware.
  */
@@ -246,3 +240,87 @@ exports.isAuthorized = function(req, res, next) {
   }
 };
 
+function calendar(events) {
+  console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+  var num = 0;
+  for (var i = 0; i < events.length; i++) {
+    var single = events[i];
+    if (freeFilter(single.name, single.description)) {
+      myCal.calendarList.list(function(err, calendarList) {
+        console.log('JUST BEFORE CALENDAR ||||||||||||||||||||||||||||||||||||||||||||||||');
+        console.log(calendarList);
+      });
+    }
+  }
+  console.log(num);
+}
+
+function freeFilter(name, description) {
+  name = name.toLowerCase();
+  description = description.toLowerCase();
+  
+  var bestWords = [
+    "free",
+    "food",
+    "drink",
+    "beverage",
+    "refreshment",
+    "snack",
+    "provided",
+    "lunch",
+    "dinner",
+    "sandwich",
+    "pizza",
+    "burger",
+    "burrito",
+    "salad",
+    "chicken",
+    "wings",
+    "coffee",
+    "donuts",
+    "cookies",
+    "serve",
+    "wishbone",
+    "jimmy",
+    "chipotle",
+    "greek lady",
+    "qdoba",
+    "allegro",
+    "chick fil",
+
+  ];
+
+  var badWords = [
+    "dollar",
+    "pay",
+    "$"
+  ];
+
+  // var regex = /\$\d+/;
+
+  for (var i = 0; i < bestWords.length; i++) {
+    if (name.indexOf(bestWords[i]) != -1) {
+      return true;
+    } else if (description.indexOf(bestWords[i]) != -1) {
+      return true;
+    }
+  }
+
+  // for (var i = 0; i < badWords.length; i++) {
+  //   if (title.indexOf(badWords[i]) != -1) {
+  //     pass -= 5;
+  //   }
+  //   if (description.indexOf(badWords[i]) != -1) {
+  //     pass -= 5;
+  //   }
+  // }
+
+  // if (title.match(regex).length != 0) {
+  //   pass -= 5;
+  // }
+  // if (description.match(regex).length != 0) {
+  //   pass -= 5;
+  // }
+
+  return false;
+}
