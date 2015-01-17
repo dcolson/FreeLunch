@@ -93,7 +93,7 @@ exports.freeFilter = function(title, description) {
   var pass = 0;
 
   var bestWords = {
-    "free",
+    "free",t
     "food",
     "drinks",
     "beverages",
@@ -101,7 +101,8 @@ exports.freeFilter = function(title, description) {
     "snacks",
     "provided",
     "lunch",
-    "dinner"
+    "dinner",
+    "blah"
   }
 
   var goodWords = {
