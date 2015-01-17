@@ -88,3 +88,77 @@ exports.getOauthUnlink = function(req, res, next) {
     });
   });
 };
+
+exports.freeFilter = function(title, description) {
+  var pass = 0;
+
+  var bestWords = {
+    "free",
+    "food",
+    "drinks",
+    "beverages",
+    "refreshments",
+    "snacks",
+    "provided",
+    "lunch",
+    "dinner"
+  }
+
+  var goodWords = {
+    "sandwich",
+    "pizza",
+    "burger",
+    "burrito",
+    "salad",
+    "chicken",
+    "wings",
+    "coffee",
+    "donuts",
+    "cookies"
+  }
+
+  var badWords = {
+    "dollar",
+    "pay"
+  }
+
+  var regex = /\$\d+/;
+
+  for (var i = 0; i < bestWords.length; i++) {
+    if (title.indexOf(bestWords[i]) != -1) {
+      pass += 1;
+    }
+    if (description.indexOf(bestWords[i]) != -1) {
+      pass += 1;
+    }
+  }
+
+  for (var i = 0; i < goodWords.length; i++) {
+    if (title.indexOf(goodWords[i]) != -1) {
+      pass += 1;
+    }
+    if (description.indexOf(goodWords[i]) != -1) {
+      pass += 1;
+    }
+  }
+
+  for (var i = 0; i < badWords.length; i++) {
+    if (title.indexOf(badWords[i]) != -1) {
+      pass -= 5;
+    }
+    if (description.indexOf(badWords[i]) != -1) {
+      pass -= 5;
+    }
+  }
+
+  for (var i = 0; i < goodWords.length; i++) {
+    if (title.match(regex).length != 0) {
+      pass -= 5;
+    }
+    if (description.match(regex).length != 0) {
+      pass -= 5;
+    }
+  }
+
+  return (pass > 1);
+}
