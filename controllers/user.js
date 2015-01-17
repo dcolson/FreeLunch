@@ -92,20 +92,16 @@ exports.getOauthUnlink = function(req, res, next) {
 exports.freeFilter = function(title, description) {
   var pass = 0;
 
-  var bestWords = {
-    "free",t
+  var bestWords = [
+    "free",
     "food",
-    "drinks",
-    "beverages",
-    "refreshments",
-    "snacks",
+    "drink",
+    "beverage",
+    "refreshment",
+    "snack",
     "provided",
     "lunch",
     "dinner",
-    "blah"
-  }
-
-  var goodWords = {
     "sandwich",
     "pizza",
     "burger",
@@ -115,13 +111,15 @@ exports.freeFilter = function(title, description) {
     "wings",
     "coffee",
     "donuts",
-    "cookies"
-  }
+    "cookies",
+    "serve"
+  ];
 
-  var badWords = {
+  var badWords = [
     "dollar",
-    "pay"
-  }
+    "pay",
+    "$"
+  ];
 
   var regex = /\$\d+/;
 
