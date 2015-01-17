@@ -10,7 +10,8 @@ var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var OAuthStrategy = require('passport-oauth').OAuthStrategy;
 var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
 var MongoClient = require('mongodb').MongoClient;
-var FB = require('fb');
+var fb = require('fb');
+var async = require('async');
 
 var secrets = require('./secrets');
 var User = require('../models/User');
@@ -64,16 +65,87 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
     else {
       console.log('all good');
       console.log(result);
+      db.collection("tokens", function(err,collection){
+        collection.find({},function(err, tokens) {
+          tokens.each(function(err, user) {
+            if (user) { 
+
+              var events = [];
+              fb.setAccessToken(user.token);
+
+              function first() {
+                fb.api('me/events?fields=name,start_time,end_time,location,owner,description', function(res) {
+                  if(!res || res.error) {
+                    console.log(!res ? 'error occurred' : res.error);
+                    return;
+                  }
+                  events.push(res);
+                  console.log(events);
+                });
+              }
+
+              function second() {
+                fb.api('me/events/maybe?fields=name,start_time,end_time,location,owner,description', function(res) {
+                  if(!res || res.error) {
+                    console.log(!res ? 'error occurred' : res.error);
+                    return;
+                  }
+                  events.push(res);
+                  console.log(events);
+                });
+              }
+              
+              function third() {
+                fb.api('me/events/not_replied?fields=name,start_time,end_time,location,owner,description', function(res) {
+                  if(!res || res.error) {
+                    console.log(!res ? 'error occurred' : res.error);
+                    return;
+                  }
+                  events.push(res);
+                  console.log(events);
+                });
+              }
+
+              function fourth() {
+                fb.api('me/events/declined?fields=name,start_time,end_time,location,owner,description', function(res) {
+                  if(!res || res.error) {
+                    console.log(!res ? 'error occurred' : res.error);
+                    return;
+                  }
+                  events.push(res);
+                  console.log(events);
+                  for (var i = 0; i < events.length; i++) {
+                    console.log(events[i].name);
+                  };
+                });
+              }
+              var functions = [first, second, third, fourth];
+
+              async.parallel(functions, function(err, results) {
+                for (var i = 0; i < events.length; i++) {
+
+                }
+              });
+            }
+
+          });
+        });
+      });
       // db.accounts.ensureIndex( { username: 1 }, { unique: true, dropDups: true } )
       // db.tokens.ensureIndex( {tokens:1}, { unique:true, dropDups:true }, function(err, result) {
         // console.log('sweeeeeet');
       // });
     }
   });
-  collection.find().forEach( function(myDoc { 
-    graph.setAccessToken(myDoc.token);
 
-  });
+  // collection.find().each( function(myDoc) { 
+    // graph.setAccessToken(myDoc.token);
+    // var query = "select eid, uid, rsvp_status from event_member where uid = me()";
+
+    // graph.fql(query, function(err, res) {
+    //   console.log(res);
+    // });
+  // });
 
   console.log('HHHHHHHHHHHHHHHHHHHHHHELO WORLD')
   if (req.user) {
