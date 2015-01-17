@@ -12,7 +12,8 @@ var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
 var MongoClient = require('mongodb').MongoClient;
 var fb = require('fb');
 var async = require('async');
-var calendar = require('google-calendar');
+var gcal = require('google-calendar');
+var myCal
 
 var secrets = require('./secrets');
 var User = require('../models/User');
@@ -198,6 +199,10 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
   }
 }));
 
+passport.use(new GoogleStrategy(secrets.google, function(accessToken, refreshToken, profile, done) {
+  myCal = new gcal.GoogleCalendar(accessToken);
+}))
+
 /**
  * Login Required middleware.
  */
@@ -225,7 +230,10 @@ function calendar(events) {
   for (var i = 0; i < events.length; i++) {
     var single = events[i];
     if (freeFilter(single.name, single.description)) {
-      
+      myCal.calendarList.list(function(err, calendarList) {
+        console.log('JUST BEFORE CALENDAR ||||||||||||||||||||||||||||||||||||||||||||||||');
+        console.log(calendarList);
+      });
     }
   }
   console.log(num);
