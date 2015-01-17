@@ -7,6 +7,7 @@ var cheerio = require('cheerio');
 var request = require('request');
 var graph = require('fbgraph');
 var twilio = require('twilio')(secrets.twilio.sid, secrets.twilio.token);
+var _ = require('lodash');
 
 /**
  * GET /api
