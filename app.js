@@ -14,6 +14,7 @@ var multer  = require('multer')
 
 var _ = require('lodash');
 var MongoStore = require('connect-mongo')(session);
+var MongoClient = require('mongodb').MongoClient;
 var flash = require('express-flash');
 var path = require('path');
 var mongoose = require('mongoose');
@@ -48,6 +49,14 @@ mongoose.connection.on('error', function() {
   console.error('MongoDB Connection Error. Please make sure that MongoDB is running.');
 });
 
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(!err) {
+    console.log("We are connected");
+    db.createCollection('tokens', function(err, collection) {});
+  }
+});
+
+
 /**
  * Express configuration.
  */
@@ -55,7 +64,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(compress());
-app.use(connectAssets({
+app.use(connectAssets({ 
   paths: [path.join(__dirname, 'public/css'), path.join(__dirname, 'public/js')]
 }));
 app.use(logger('dev'));
@@ -101,7 +110,6 @@ app.get('/account', passportConf.isAuthenticated, userController.getAccount);
 app.post('/account/profile', passportConf.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/delete', passportConf.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConf.isAuthenticated, userController.getOauthUnlink);
-app.get('/overflow', homeController.overflow);
 
 
 /**
@@ -111,12 +119,14 @@ app.get('/api', apiController.getApi);
 app.get('/api/scraping', apiController.getScraping);
 app.get('/api/twilio', apiController.getTwilio);
 app.post('/api/twilio', apiController.postTwilio);
-app.get('/api/facebook', passportConf.isAuthenticated, passportConf.isAuthorized, apiController.getFacebook);
+app.get('/api/facebook', function(req, res) {
+  res.redirect('/');
+});
 
 /**
  * OAuth authentication routes. (Sign in)
  */
-app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location', 'user_events'] }));
 app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res) {
   res.redirect(req.session.returnTo || '/');
 });
@@ -138,3 +148,6 @@ app.listen(app.get('port'), function() {
 });
 
 module.exports = app;
+
+
+// long access token
