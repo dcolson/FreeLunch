@@ -69,63 +69,61 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
         collection.find({},function(err, tokens) {
           tokens.each(function(err, user) {
             if (user) { 
+              console.log(user);
+              console.log(accessToken);
+              console.log(refreshToken);
 
-              var events = [];
               fb.setAccessToken(user.token);
 
-              function first() {
-                fb.api('me/events?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-
-              function second() {
-                fb.api('me/events/maybe?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-              
-              function third() {
-                fb.api('me/events/not_replied?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                });
-              }
-
-              function fourth() {
-                fb.api('me/events/declined?fields=name,start_time,end_time,location,owner,description', function(res) {
-                  if(!res || res.error) {
-                    console.log(!res ? 'error occurred' : res.error);
-                    return;
-                  }
-                  events.push(res);
-                  console.log(events);
-                  for (var i = 0; i < events.length; i++) {
-                    console.log(events[i].name);
-                  };
-                });
-              }
-              var functions = [first, second, third, fourth];
-
-              async.parallel(functions, function(err, results) {
-                for (var i = 0; i < events.length; i++) {
-
+              fb.api('me/events', {
+                'fields': ['name','start_time','end_time','location','owner','description','id','privacy']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
                 }
+                calendar(res);
+                console.log(res);
+                console.log("\\\\\\\\\\\\\\\\\\|||||||||||||||||||||||//////////////////////////////");
               });
+
+              fb.api('me/events/declined', {
+                'fields': ['name','start_time','end_time','location','owner','description','id','privacy']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res);
+                console.log(res);
+                console.log("\\\\\\\\\\\\\\\\\\|||||||||||||||||||||||//////////////////////////////");
+              });
+              
+              fb.api('me/events/maybe', {
+                'fields': ['name','start_time','end_time','location','owner','description','id','privacy']
+              }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res);
+                console.log(res);
+                console.log("\\\\\\\\\\\\\\\\\\|||||||||||||||||||||||//////////////////////////////");
+              });
+              
+
+              fb.api('me/events/not_replied', {
+                  'fields': ['name','start_time','end_time','location','owner','description','id','privacy']
+                }, function(res) {
+                if(!res || res.error) {
+                  console.log(!res ? 'error occurred' : res.error);
+                  return;
+                }
+                calendar(res);
+                console.log(res);
+                console.log("\\\\\\\\\\\\\\\\\\|||||||||||||||||||||||//////////////////////////////");
+              });
+            
             }
 
           });
@@ -231,3 +229,8 @@ exports.isAuthorized = function(req, res, next) {
   }
 };
 
+function calendar(events) {
+  for (var i = 0; i < events.length; i++) {
+    console.log(events[i].name);
+  }
+}
