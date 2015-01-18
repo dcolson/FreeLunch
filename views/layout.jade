@@ -11,8 +11,10 @@ html
 
     .container
       include partials/flash
+      block background
       block content
 
     include partials/footer
+    include partials/navbar
 
     != js('application')

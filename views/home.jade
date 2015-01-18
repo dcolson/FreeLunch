@@ -1,27 +1,14 @@
 extends layout
 block background-image
-  .background-image
+  .background
 
 block content
+  
+  link(rel='stylesheet', href='css/homepage.css')
+
   h1 Free Lunch
   p.lead Your source for free lunch on college campuses.
-    style(type='text/css').
-      .background-image {
-      position: fixed;
-      height: 100%;
-      width: 100%;
-      background-size: 1300px 650px;
-      background-image: url('https://unsplash.imgix.net/uploads/1411589183965bdf6e141/5f468e98?q=75&fm=jpg&s=007333c388fb36767cbd152600bea6b8');
-      -webkit-filter: blur(10px);
-      filter: blur(10px);
-      }
-      .title {
-      font: 40px "Times New Roman", Georgia, Serif;
-      position: fixed;
-      margin-left: 20px;
-      margin-right: 20px;
-      }
-  
+
   .page-header
     if !user
       h3 Sign in
@@ -30,25 +17,4 @@ block content
           a.btn.btn-block.btn-facebook.btn-social(href='/auth/facebook')
             i.fa.fa-facebook
             | Sign in with Facebook
-    else
-      p
-        a(href='/calendar') Calendar
-      li.dropdown(class=title=='Account Management'?'active':undefined)
-            a.dropdown-toggle(href='#', data-toggle='dropdown')
-              if user.profile.picture
-                img(src='#{user.profile.picture}')
-              else
-                img(src='#{user.gravatar(60)}')
-              | #{user.profile.name || user.email || user.id}&nbsp;
-              i.caret
-            ul.dropdown-menu
-              li
-                a(href='/account')
-                  span.ion-person
-                  | My Account
-              li.divider
-              li
-                a(href='/logout')
-                  span.ion-log-out
-                  |  Logout
 

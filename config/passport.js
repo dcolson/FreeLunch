@@ -118,22 +118,6 @@ passport.use(new FacebookStrategy(secrets.facebook, function(req, accessToken, r
               });
             
             }
-
-            var eventsCollection = db.collection('events');
-
-            function findEvents(events) {
-              for (var i = 0; i < events.length; i++) {
-                var e = event[i];
-                if (userController.freeFilter(e.name, e.description)) {
-                  eventsCollection.update({_id: e.id}, {info: e}, {upsert: true}, function(err, result) {
-                  if (err) {console.log('Problem adding event to database!'); console.log(err); }
-                }
-              }
-            }
-
-
-
-
           });
         });
       });

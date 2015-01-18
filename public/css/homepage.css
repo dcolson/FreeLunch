@@ -1,0 +1,48 @@
+body {
+	position: fixed;
+    height: 100%;
+    width: 100%;
+    background-size: 1300px 650px;
+    background-image: url('https://unsplash.imgix.net/uploads/1411589183965bdf6e141/5f468e98?q=75&fm=jpg&s=007333c388fb36767cbd152600bea6b8');
+    -webkit-filter: blur(10px);
+    filter: blur(10px);
+}
+
+title {
+	font: 40px "Times New Roman", Georgia, Serif;
+    position: fixed;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+h1 {
+	font-size:72px;
+	text-align:center;
+	color: #ffd700;
+	text-shadow:5px 1px 0 #000,
+	-1px -1px 0 #000,
+	1px -1px 0 #000,
+	-1px 1px 0 #000,
+	0px 1px 0 #000,
+	1px 0px 0 #000,
+	0px -1px 0 #000,
+	-1px 0px 0 #000,
+	4px 4px 3px #000;
+	font-family:Verdana, Geneva, sans-serif;
+}
+
+h2 {
+	font-size:32px;
+	text-align:center;
+	color: #ffd700;
+	text-shadow:5px 1px 0 #000,
+	-1px -1px 0 #000,
+	1px -1px 0 #000,
+	-1px 1px 0 #000,
+	0px 1px 0 #000,
+	1px 0px 0 #000,
+	0px -1px 0 #000,
+	-1px 0px 0 #000,
+	4px 4px 3px #000;
+	font-family:Verdana, Geneva, sans-serif;
+}
